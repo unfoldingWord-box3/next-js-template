@@ -19,7 +19,7 @@ export default async function sendFeedback({ name, email, message, category, ext
   const msg = {
     to: process.env.HELP_DESK_EMAIL,
     from: email,
-    subject: `gatewayEdit App: ${category}`,
+    subject: `Next.js Template App: ${category}`,
     text: fullMessage,
     html: fullMessage.replace(/\n/g, '<br>'),
   }
