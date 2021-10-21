@@ -21,6 +21,8 @@ A. You will run the template in order to improve it, test it, extend it, etc.
 *Steps*
 
 1. Use `git clone git@github.com:unfoldingWord-box3/next-js-template.git` to download the latest code and set up as a local git repo. NOTE: alternativiely, the repo may be forked.
+2. Use `yarn install` to build the app template
+2. Use `yarn dev` to run the app template
 2. Create a branch to contain your changes
 3. Make changes, commit, and push to your branch
 4. When changes are complete, create Pull Request (PR) and request they be reviewed and merged
