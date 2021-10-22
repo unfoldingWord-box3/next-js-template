@@ -1,7 +1,7 @@
 import packagefile from '../../package.json'
 
 export const APP_VERSION = packagefile.version
-export const APP_NAME = 'gatewayEdit'
+export const APP_NAME = 'next-js-template'
 export const BASE_URL = 'https://git.door43.org'
 export const QA_BASE_URL = 'https://qa.door43.org'
 export const QA = 'QA'

@@ -11,6 +11,7 @@ The goals:
 1. How to run the template
 2. How to use the template
 3. Using the tutorials
+4. Customizations
 
 ## How to run the template
 
@@ -48,3 +49,12 @@ TBD... here point to one or more tutorials showing how use the template to actua
 Potential Ideas:
 - Using the Bible Reference RCL with Proskomma
 - Using the Translation Helps RCL to display content
+
+# Customizations
+
+## Changing the App Name
+
+There are these places where the app name must be updated:
+- `package.json`
+- `src/common/constants.js`
+- `src/common/sendFeedback.js`
