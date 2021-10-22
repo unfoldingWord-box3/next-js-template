@@ -8,7 +8,7 @@ import Toolbar from '@material-ui/core/Toolbar'
 import MenuIcon from '@material-ui/icons/Menu'
 import AppBar from '@material-ui/core/AppBar'
 import Drawer from '@components/Drawer'
-import BibleReference from '@components/BibleReference'
+//import BibleReference from '@components/BibleReference'
 import { AuthContext } from '@context/AuthContext'
 import { StoreContext } from '@context/StoreContext'
 import FeedbackPopup from '@components/FeedbackPopup'
@@ -87,9 +87,6 @@ export default function Header({
             >
               {title}
             </Typography>
-          </div>
-          <div className='flex flex-1 justify-center items-center'>
-            <BibleReference />
           </div>
           <div className='flex flex-1 justify-end'>
             {/* <Button
