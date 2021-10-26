@@ -1,34 +1,12 @@
 import {
   useContext,
   useEffect,
-  useMemo,
   useState,
 } from 'react'
-import * as isEqual from 'deep-equal'
 import { Workspace } from 'resource-workspace-rcl'
 import { makeStyles } from '@material-ui/core/styles'
-import { SelectionsContextProvider } from 'scripture-resources-rcl'
-import {
-  NT_ORIG_LANG,
-  NT_ORIG_LANG_BIBLE,
-  ORIGINAL_SOURCE,
-  OT_ORIG_LANG,
-  OT_ORIG_LANG_BIBLE,
-  ScriptureCard,
-  splitUrl,
-  TARGET_LITERAL,
-  TARGET_SIMPLIFIED,
-  useScripture,
-} from 'single-scripture-rcl'
-import { DraggableCard, useResourceClickListener } from 'translation-helps-rcl'
-import ResourceCard from '@components/ResourceCard'
-import {
-  getLatestBibleRepo,
-  getResourceBibles,
-} from '@utils/resources'
+
 import { StoreContext } from '@context/StoreContext'
-import { isNT } from '@common/BooksOfTheBible'
-import { getLanguage } from '@common/languages'
 import CircularProgress from '@components/CircularProgress'
 import {
   addNetworkDisconnectError,
@@ -39,8 +17,7 @@ import {
 import { useRouter } from 'next/router'
 import { HTTP_CONFIG } from '@common/constants'
 import NetworkErrorPopup from '@components/NetworkErrorPopUp'
-import useLexicon from '@hooks/useLexicon'
-import { translate } from '@utils/lexiconHelpers'
+import { Paper, useResourceClickListener } from 'translation-helps-rcl'
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -59,7 +36,6 @@ function WorkspaceContainer() {
   const router = useRouter()
   const classes = useStyles()
   const [workspaceReady, setWorkspaceReady] = useState(false)
-  const [selections, setSelections] = useState([])
   const [networkError, setNetworkError] = useState(null)
   const {
     state: {
@@ -68,34 +44,15 @@ function WorkspaceContainer() {
       appRef,
       taArticle,
       languageId,
-      selectedQuote,
-      scriptureOwner,
-      bibleReference: {
-        bookId, chapter, verse,
-      },
-      supportedBibles,
       currentLayout,
-      useUserLocalStorage,
       loggedInUser,
-      authentication,
       tokenNetworkError,
-      greekRepoUrl,
-      hebrewRepoUrl,
-      mainScreenRef,
-      savedChanges,
     },
     actions: {
       logout,
-      setQuote,
-      setSupportedBibles,
       setCurrentLayout,
       setTokenNetworkError,
       setLastError,
-      updateTaDetails,
-      setGreekRepoUrl,
-      setHebrewRepoUrl,
-      setSavedChanges,
-      showSaveChangesPrompt,
     },
   } = useContext(StoreContext)
 
@@ -114,11 +71,6 @@ function WorkspaceContainer() {
     httpConfig: HTTP_CONFIG,
   })
 
-  const { actions: { fetchGlossesForVerse, getLexiconData } } = useLexicon({
-    bookId,
-    languageId,
-    server,
-  })
 
   /**
    * in the case of a network error, process and display error dialog
@@ -187,145 +139,29 @@ function WorkspaceContainer() {
     }
   }
 
-  const commonScriptureCardConfigs = {
-    isNT,
-    server,
-    appRef,
-    classes,
-    getLanguage,
-    useUserLocalStorage,
-    originalLanguageOwner: scriptureOwner,
-    onResourceError,
-    httpConfig: HTTP_CONFIG,
-    greekRepoUrl,
-    hebrewRepoUrl,
-    fetchGlossesForVerse,
-    getLexiconData,
-    translate,
-  }
-
-  const commonResourceCardConfigs = {
-    classes,
-    chapter,
-    verse,
-    server,
-    owner,
-    appRef,
-    languageId,
-    useUserLocalStorage,
-    onResourceError,
-    loggedInUser,
-    authentication,
-  }
 
   useEffect(() => {
     setWorkspaceReady(false)
 
     if (owner && languageId && appRef && server && loggedInUser) {
-      getResourceBibles({
-        bookId,
-        chapter,
-        verse,
-        resourceId: languageId === 'en' ? 'ult' : 'glt',
-        owner,
-        languageId,
-        ref: appRef,
-        server,
-      }).then(results => {
-        const { bibles, resourceLink } = results
-
-        if (bibles?.length) {
-          if (!isEqual(bibles, supportedBibles)) {
-            console.log(`found ${bibles?.length} bibles`)
-            setSupportedBibles(bibles) // TODO blm: update bible refs
-          }
-        } else {
-          console.warn(`no bibles found for ${resourceLink}`)
-        }
-        setWorkspaceReady(true)
-      }).catch((e) => {
-        setWorkspaceReady(true)
-        processError(e.toString())
-      })
+      setWorkspaceReady(true)
     }// eslint-disable-next-line
   }, [owner, languageId, appRef, server, loggedInUser])
 
-  useEffect(() => {
-    const missingOrignalBibles = !hebrewRepoUrl || !greekRepoUrl
 
-    if (missingOrignalBibles) { // if we don't have a path
-      setWorkspaceReady(false)
-      console.log(`WorkspaceContainer - waiting on latest original bible repos`)
-    }
-
-    const hebrewPromise = getLatestBibleRepo(server, 'unfoldingWord', 'hbo', 'uhb', processError)
-    const greekPromise = getLatestBibleRepo(server, 'unfoldingWord', 'el-x-koine', 'ugnt', processError)
-
-    Promise.all([hebrewPromise, greekPromise]).then( (results) => {
-      const [repoHebrew, repoGreek] = results
-      let changed = false
-
-      if (repoHebrew && (repoHebrew !== hebrewRepoUrl)) {
-        setHebrewRepoUrl(repoHebrew)
-        changed = true
-      }
-
-      if (repoGreek && (repoGreek !== greekRepoUrl)) {
-        setGreekRepoUrl(repoGreek)
-        changed = true
-      }
-
-      if (missingOrignalBibles && repoHebrew && repoGreek) {
-        console.log(`WorkspaceContainer - found original bible repos`)
-        setWorkspaceReady(true)
-      } else if (changed) { // force redraw
-        console.log(`WorkspaceContainer - original bible repos changed, force reload`)
-        setWorkspaceReady(false)
-        setTimeout(() => {
-          setWorkspaceReady(true)
-        }, 500)
-      }
-    })
-  }, [])
-
-  const isNewTestament = isNT(bookId)
-  const originalScripture = {
-    reference: {
-      projectId: bookId,
-      chapter,
-      verse,
-    },
-    isNT: () => isNT(bookId),
-    resource: {
-      owner: 'unfoldingWord',
-      originalLanguageOwner: 'unfoldingWord',
-      languageId: isNewTestament ? NT_ORIG_LANG : OT_ORIG_LANG,
-      resourceId: ORIGINAL_SOURCE,
-    },
-    getLanguage: () => ({ direction: isNewTestament ? 'ltr' : 'rtl' }),
-  }
 
   const config = {
     server,
     ...HTTP_CONFIG,
   }
 
-  const { server: origServer, resourceLink: origResourceLink } = useMemo(() => splitUrl(isNewTestament ? greekRepoUrl : hebrewRepoUrl), [isNewTestament, greekRepoUrl, hebrewRepoUrl])
-
-  const originalScriptureConfig = useScripture({
-    ...originalScripture,
-    resource: {
-      ...originalScripture.resource,
-      resourceId: isNewTestament ? NT_ORIG_LANG_BIBLE : OT_ORIG_LANG_BIBLE,
-      projectId: isNewTestament ? NT_ORIG_LANG_BIBLE : OT_ORIG_LANG_BIBLE,
-      ref: appRef,
-    },
-    resourceLink: origResourceLink,
-    config: {
-      ...config,
-      server: origServer,
-    },
-  })
+  const textForDisplay = [
+    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+    "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?",
+    "But I must explain to you how all this mistaken idea of denouncing pleasure and praising pain was born and I will give you a complete account of the system, and expound the actual teachings of the great explorer of the truth, the master-builder of human happiness. No one rejects, dislikes, or avoids pleasure itself, because it is pleasure, but because those who do not know how to pursue pleasure rationally encounter consequences that are extremely painful. Nor again is there anyone who loves or pursues or desires to obtain pain of itself, because it is pain, but because occasionally circumstances occur in which toil and pain can procure him some great pleasure. To take a trivial example, which of us ever undertakes laborious physical exercise, except to obtain some advantage from it? But who has any right to find fault with a man who chooses to enjoy a pleasure that has no annoying consequences, or one who avoids a pain that produces no resultant pleasure?",
+    "At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis voluptas assumenda est, omnis dolor repellendus. Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus asperiores repellat.",
+    "On the other hand, we denounce with righteous indignation and dislike men who are so beguiled and demoralized by the charms of pleasure of the moment, so blinded by desire, that they cannot foresee the pain and trouble that are bound to ensue; and equal blame belongs to those who fail in their duty through weakness of will, which is the same as saying through shrinking from toil and pain. These cases are perfectly simple and easy to distinguish. In a free hour, when our power of choice is untrammelled and when nothing prevents our being able to do what we like best, every pleasure is to be welcomed and every pain avoided. But in certain circumstances and owing to the claims of duty or the obligations of business it will frequently occur that pleasures have to be repudiated and annoyances accepted. The wise man therefore always holds in these matters to this principle of selection: he rejects pleasures to secure other greater pleasures, or else he endures pains to avoid worse pains.",
+  ];
 
   return (
     (tokenNetworkError || networkError || !workspaceReady) ? // Do not render workspace until user logged in and we have user settings
@@ -334,26 +170,6 @@ function WorkspaceContainer() {
         <CircularProgress size={180} />
       </>
       :
-      <SelectionsContextProvider
-        selections={selections}
-        onSelections={setSelections}
-        quote={selectedQuote?.quote}
-        occurrence={selectedQuote?.occurrence?.toString()}
-        verseObjects={originalScriptureConfig.verseObjects || []}
-      >
-        {loading || content || error ?
-          <DraggableCard
-            open
-            error={error}
-            title={title}
-            loading={loading}
-            content={content}
-            onClose={() => clearContent()}
-            workspaceRef={mainScreenRef}
-          />
-          :
-          null
-        }
         <Workspace
           rowHeight={25}
           layout={currentLayout}
@@ -364,10 +180,9 @@ function WorkspaceContainer() {
           }}
           layoutWidths={[
             [1, 1, 1],
-            [2, 2],
-            [1, 1.5, 1.5],
+            [2, 2, 2],
           ]}
-          layoutHeights={[[5], [10, 10], [10, 10]]}
+          layoutHeights={[[10,10], [10, 10], [10, 10]]}
           minW={3}
           minH={4}
           breakpoints={{
@@ -381,138 +196,16 @@ function WorkspaceContainer() {
             xs: 3,
           }}
         >
-          <ScriptureCard
-            cardNum={0}
-            title='Literal Translation'
-            reference={{
-              chapter,
-              verse,
-              bookId,
-              projectId: bookId,
-            }}
-            resource={{
-              owner,
-              languageId,
-              resourceId: TARGET_LITERAL,
-              originalLanguageOwner: scriptureOwner,
-            }}
-            {...commonScriptureCardConfigs}
-          />
-
-          <ScriptureCard
-            cardNum={1}
-            title='Original Source'
-            reference={{
-              chapter,
-              verse,
-              bookId,
-              projectId: bookId,
-            }}
-            resource={{
-              owner,
-              languageId,
-              resourceId: ORIGINAL_SOURCE,
-              originalLanguageOwner: scriptureOwner,
-            }}
-            {...commonScriptureCardConfigs}
-          />
-
-          <ScriptureCard
-            cardNum={2}
-            title='Simplified Translation'
-            reference={{
-              chapter,
-              verse,
-              bookId,
-              projectId: bookId,
-            }}
-            resource={{
-              owner,
-              languageId,
-              resourceId: TARGET_SIMPLIFIED,
-              originalLanguageOwner: scriptureOwner,
-            }}
-            {...commonScriptureCardConfigs}
-          />
-
-          <ResourceCard
-            title='translationNotes'
-            id='resource_card_tn'
-            {...commonResourceCardConfigs}
-            filePath={null}
-            resourceId={'tn'}
-            projectId={bookId}
-            setQuote={setQuote}
-            selectedQuote={selectedQuote}
-            updateTaDetails={updateTaDetails}
-            loggedInUser={loggedInUser}
-            authentication={authentication}
-            setSavedChanges={setSavedChanges}
-            showSaveChangesPrompt={showSaveChangesPrompt}
-          />
-          <ResourceCard
-            title='translationAcademy'
-            id='resource_card_ta'
-            {...commonResourceCardConfigs}
-            resourceId={'ta'}
-            projectId={taArticle?.projectId}
-            filePath={taArticle?.filePath}
-            errorMessage={taArticle ? null : 'No article is specified in the current note.'}
-            loggedInUser={loggedInUser}
-            authentication={authentication}
-            setSavedChanges={setSavedChanges}
-            showSaveChangesPrompt={showSaveChangesPrompt}
-          />
-          <ResourceCard
-            title='translationWords List'
-            id='resource_card_twl'
-            {...commonResourceCardConfigs}
-            viewMode={'list'}
-            resourceId={'twl'}
-            projectId={bookId}
-            filePath={null}
-            setQuote={setQuote}
-            selectedQuote={selectedQuote}
-            disableFilters
-            disableNavigation
-            hideMarkdownToggle
-            loggedInUser={loggedInUser}
-            authentication={authentication}
-            setSavedChanges={setSavedChanges}
-            showSaveChangesPrompt={showSaveChangesPrompt}
-          />
-          <ResourceCard
-            title='translationWords Article'
-            id='resource_card_twa'
-            {...commonResourceCardConfigs}
-            viewMode={'markdown'}
-            resourceId={'twl'}
-            projectId={bookId}
-            filePath={null}
-            setQuote={setQuote}
-            selectedQuote={selectedQuote}
-            disableFilters
-            loggedInUser={loggedInUser}
-            authentication={authentication}
-            setSavedChanges={setSavedChanges}
-            showSaveChangesPrompt={showSaveChangesPrompt}
-          />
-          <ResourceCard
-            title='translationQuestions'
-            id='resource_card_tq'
-            {...commonResourceCardConfigs}
-            resourceId={'tq'}
-            projectId={bookId}
-            filePath={null}
-            viewMode='question'
-            disableFilters
-            loggedInUser={loggedInUser}
-            authentication={authentication}
-            setSavedChanges={setSavedChanges}
-            showSaveChangesPrompt={showSaveChangesPrompt}
-          />
+          {
+            textForDisplay.map(  (text) =>           
+              <Paper>
+                <p style={{ padding: '30px' }}>
+                  {text}
+                </p>
+              </Paper>
+            )
+          }
         </Workspace>
-      </SelectionsContextProvider>
   )
 }
 
