@@ -1,4 +1,3 @@
-import NetlifyBadge from '@components/NetlifyBadge'
 import Typography from '@material-ui/core/Typography'
 import PropTypes from 'prop-types'
 
@@ -16,7 +15,6 @@ export default function Footer({
           <span id='server'>{` ${serverID}`}</span>
         </div>
       </Typography>
-      <NetlifyBadge />
       <div className='w-40'></div>
     </footer>
   )
