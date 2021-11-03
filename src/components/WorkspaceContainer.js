@@ -42,7 +42,6 @@ function WorkspaceContainer() {
       owner,
       server,
       appRef,
-      taArticle,
       languageId,
       currentLayout,
       loggedInUser,
@@ -55,22 +54,6 @@ function WorkspaceContainer() {
       setLastError,
     },
   } = useContext(StoreContext)
-
-  const [
-    {
-      loading, title, content, error,
-    },
-    clearContent,
-  ] = useResourceClickListener({
-    owner,
-    server,
-    ref: appRef,
-    taArticle,
-    languageId,
-    onResourceError,
-    httpConfig: HTTP_CONFIG,
-  })
-
 
   /**
    * in the case of a network error, process and display error dialog
