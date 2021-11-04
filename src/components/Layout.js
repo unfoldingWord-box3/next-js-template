@@ -1,4 +1,6 @@
-import { useContext, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  useContext, useEffect, useMemo, useRef, useState,
+} from 'react'
 import PropTypes from 'prop-types'
 import { AuthenticationContext } from 'gitea-react-toolkit'
 import Header from '@components/Header'
@@ -6,7 +8,9 @@ import Footer from '@components/Footer'
 import Onboarding from '@components/Onboarding'
 import { StoreContext } from '@context/StoreContext'
 import { getBuildId } from '@utils/build'
-import { APP_NAME, BASE_URL, PROD, QA, QA_BASE_URL } from '@common/constants'
+import {
+  APP_NAME, BASE_URL, PROD, QA, QA_BASE_URL,
+} from '@common/constants'
 import useValidateAccountSettings from '@hooks/useValidateAccountSettings'
 import { useRouter } from 'next/router'
 

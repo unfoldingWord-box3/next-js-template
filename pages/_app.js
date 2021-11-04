@@ -6,6 +6,7 @@ import StoreContextProvider from '@context/StoreContext'
 import AuthContextProvider from '@context/AuthContext'
 import { APP_NAME } from '@common/constants'
 import AppHead from '@components/AppHead'
+import Layout from '@components/Layout'
 import theme from '../src/theme'
 import '@styles/globals.css'
 
@@ -27,7 +28,9 @@ export default function Application({ Component, pageProps }) {
         <CssBaseline />
         <AuthContextProvider>
           <StoreContextProvider>
-            <Component {...pageProps} />
+            <Layout>
+              <Component {...pageProps} />
+            </Layout>
           </StoreContextProvider>
         </AuthContextProvider>
       </ThemeProvider>
