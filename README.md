@@ -124,6 +124,7 @@ A. You will run the template in order to improve it, test it, extend it, etc.
 Things you need to use the software and how to install them.
 
 * npm
+
   ```sh
   npm install npm@latest -g
   ```
@@ -184,6 +185,8 @@ A. You will use the template to create a new unfoldingWord application.
   - `src/common/constants.js`
   - `src/common/sendFeedback.js`
 
+Please refer to the [Nextjs Readme](docs/NEXTJS_README.md) for more Nextjs specific documentation.
+
 ## Using the Tutorials
 
 TBD... here point to one or more tutorials showing how to use the template to actually develop something useful...
@@ -231,11 +234,9 @@ If you would like to fork the repo and create a pull request.
 <!-- LICENSE -->
 ## License
 
-Distributed under the MIT License. See `LICENSE` for more information.
+Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
-
-
 
 <!-- CONTACT -->
 ## Contact
@@ -268,6 +269,6 @@ Project Link: [https://github.com/unfoldingWord-box3/next-js-template](https://g
 [issues-shield]: https://img.shields.io/github/issues/unfoldingWord-box3/next-js-template.svg?style=for-the-badge
 [issues-url]: https://github.com/unfoldingWord-box3/next-js-template/issues
 [license-shield]: https://img.shields.io/github/license/unfoldingWord-box3/next-js-template.svg?style=for-the-badge
-[license-url]: https://github.com/unfoldingWord-box3/next-js-template/blob/master/LICENSE.txt
+[license-url]: https://github.com/unfoldingWord-box3/next-js-template/blob/master/LICENSE
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [product-screenshot]: images/screenshot.png
