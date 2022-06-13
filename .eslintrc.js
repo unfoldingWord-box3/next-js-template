@@ -5,10 +5,9 @@ module.exports = {
     "plugin:react/recommended",
     "plugin:import/errors",
     "plugin:import/warnings",
-    "prettier",
-    "prettier/react"
+    "prettier"
   ],
-  "parser": "babel-eslint",
+  "parser": "@babel/eslint-parser",
   "parserOptions": {
     "ecmaVersion": 2018,
     "ecmaFeatures": {
