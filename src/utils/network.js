@@ -130,7 +130,7 @@ export async function getNetworkError(error, httpCode ) {
  * @param {function} setErrorMessage - optional callback to apply error message
  */
 export async function processNetworkError(error, httpCode, logout, router,
-                                          setNetworkError, setLastError, setErrorMessage,
+  setNetworkError, setLastError, setErrorMessage,
 ) {
   // TRICKY we need to show an initial message because there may be delays checking for server connection.
   //    if server responds, this message should be quickly replaced with final message
@@ -162,7 +162,7 @@ export async function processNetworkError(error, httpCode, logout, router,
  * @param {function} setErrorMessage - optional callback to apply error message
  */
 export async function addNetworkDisconnectError(error, httpCode, logout, router,
-                                                setNetworkError, setLastError, setErrorMessage,
+  setNetworkError, setLastError, setErrorMessage,
 ) {
   const errorObj = await getNetworkError(error, httpCode)
 

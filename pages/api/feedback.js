@@ -1,10 +1,12 @@
 import sendFeedback from '../../src/common/sendFeedback'
 
-export default async (req, res) => {
+const Feedback = async (req, res) => {
   let errorMessage
 
   if (req.method === 'POST') {
-    const { name, email, message, category, extraData } = req.body
+    const {
+      name, email, message, category, extraData,
+    } = req.body
 
     try {
       const response = await sendFeedback({
@@ -18,7 +20,7 @@ export default async (req, res) => {
       console.log(`sendFeedback() response: ${JSON.stringify(response)}`)
 
       if (!errorMessage) {
-        return res.status(200).json({...response})
+        return res.status(200).json({ ...response })
       }
     } catch (e) {
       errorMessage = e.toString()
@@ -42,3 +44,5 @@ export default async (req, res) => {
     },
   })
 }
+
+export default Feedback;
