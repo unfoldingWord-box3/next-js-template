@@ -27,6 +27,7 @@ export const getGatewayLanguages = async () => {
 
 export const formatLanguage = ({ language }) => {
   let _language = {}
+
   if (language) {
     _language = {
       id: language.pk,
